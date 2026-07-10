@@ -1,0 +1,29 @@
+def calculate_infrastructure_score(whois, dns, ssl):
+    score = 30
+    issues = []
+
+    ssl_data = ssl.get("data", {})
+
+    # SSL
+    if ssl.get("status") != "success":
+        score -= 15
+        issues.append("SSL information unavailable.")
+    else:
+        if ssl_data.get("expired"):
+            score -= 10
+            issues.append("SSL certificate has expired.")
+
+        if not ssl_data.get("https"):
+            score -= 5
+            issues.append("HTTPS is not enabled.")
+
+    # WHOIS
+    if whois.get("status") != "success":
+        score -= 5
+        issues.append("WHOIS lookup failed.")
+    else:
+        if not whois["data"].get("registrar"):
+            score -= 3
+            issues.append("Registrar information unavailable.")
+
+    return max(score, 0), issues

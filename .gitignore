@@ -1,0 +1,37 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment
+.env
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Build
+dist/
+build/
+
+# Testing
+.pytest_cache/
+
+# Coverage
+.coverage
+
+# Node
+node_modules/
+
+# IDE
+.idea/
+
+# OS
+Thumbs.db
