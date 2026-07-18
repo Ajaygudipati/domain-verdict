@@ -16,9 +16,9 @@ export default function SearchBar() {
     setLoading(true);
     setProgress({ stage: "Preparing scan", completed: 0, total: 13 });
     let finished = false;
-    const stream = new EventSource(
-      `http://127.0.0.1:8000/scan/stream?domain=${encodeURIComponent(domain.trim())}${token ? `&token=${encodeURIComponent(token)}` : ""}`
-    );
+  const stream = new EventSource(
+    `${import.meta.env.VITE_API_URL}/scan/stream?domain=${encodeURIComponent(domain.trim())}${token ? `&token=${encodeURIComponent(token)}` : ""}`
+  );
 
     stream.addEventListener("progress", (event) => {
       setProgress(JSON.parse(event.data));
