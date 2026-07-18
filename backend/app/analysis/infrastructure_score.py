@@ -1,5 +1,8 @@
+from app.core.scoring import CATEGORY_WEIGHTS
+
+
 def calculate_infrastructure_score(whois, dns, ssl):
-    score = 30
+    score = CATEGORY_WEIGHTS["infrastructure"]
     issues = []
 
     ssl_data = ssl.get("data", {})
@@ -25,5 +28,10 @@ def calculate_infrastructure_score(whois, dns, ssl):
         if not whois["data"].get("registrar"):
             score -= 3
             issues.append("Registrar information unavailable.")
+
+    # DNS is returned as a plain record map rather than a scanner envelope.
+    if not dns.get("A") and not dns.get("AAAA"):
+        score -= 5
+        issues.append("No A or AAAA record was found.")
 
     return max(score, 0), issues

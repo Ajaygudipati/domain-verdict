@@ -1,6 +1,9 @@
+from app.core.scoring import CATEGORY_WEIGHTS
+
+
 def calculate_email_security_score(spf, dkim, dmarc):
 
-    score = 20
+    score = CATEGORY_WEIGHTS["email_security"]
     issues = []
 
     # -------------------
@@ -36,11 +39,11 @@ def calculate_email_security_score(spf, dkim, dmarc):
         issues.append("DMARC policy could be stronger.")
 
     elif dmarc_score >= 4:
-        score -= 5
+        score -= 6
         issues.append("Weak DMARC policy.")
 
     else:
-        score -= 8
+        score -= 10
         issues.append("DMARC protection missing.")
 
     return max(score, 0), issues

@@ -18,7 +18,7 @@ def calculate_threat_intelligence_score(
 
     vt_score = virustotal.get("score", 0)
 
-    if vt_score < 10:
+    if virustotal.get("status") == "success" and vt_score < 10:
 
         deduction = 10 - vt_score
 
@@ -27,6 +27,8 @@ def calculate_threat_intelligence_score(
         issues.extend(
             virustotal.get("issues", [])
         )
+    elif virustotal.get("status") != "success":
+        issues.append("VirusTotal was unavailable; this scan has reduced threat-intelligence coverage.")
 
     # ------------------------------------
     # AbuseIPDB (10 Points)
@@ -34,7 +36,7 @@ def calculate_threat_intelligence_score(
 
     abuse_score = abuseipdb.get("score", 0)
 
-    if abuse_score < 10:
+    if abuseipdb.get("status") == "success" and abuse_score < 10:
 
         deduction = 10 - abuse_score
 
@@ -43,6 +45,8 @@ def calculate_threat_intelligence_score(
         issues.extend(
             abuseipdb.get("issues", [])
         )
+    elif abuseipdb.get("status") != "success":
+        issues.append("AbuseIPDB was unavailable; this scan has reduced threat-intelligence coverage.")
 
     # ------------------------------------
     # Google Safe Browsing (10 Points)
@@ -50,7 +54,7 @@ def calculate_threat_intelligence_score(
 
     gsb_score = google_safe_browsing.get("score", 0)
 
-    if gsb_score < 10:
+    if google_safe_browsing.get("status") == "success" and gsb_score < 10:
 
         deduction = 10 - gsb_score
 
@@ -59,6 +63,8 @@ def calculate_threat_intelligence_score(
         issues.extend(
             google_safe_browsing.get("issues", [])
         )
+    elif google_safe_browsing.get("status") != "success":
+        issues.append("Google Safe Browsing was unavailable; this scan has reduced threat-intelligence coverage.")
 
     # ------------------------------------
     # Prevent Negative Scores

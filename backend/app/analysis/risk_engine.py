@@ -114,13 +114,27 @@ def calculate_risk(
         trust_level = "DANGEROUS"
 
     # ------------------------------------
-    # Confidence
+    # Confidence is based on the amount of evidence collected, not the verdict.
+    # A score can be high while a third-party provider is unavailable, so using
+    # the score itself here would overstate how complete the assessment is.
     # ------------------------------------
 
-    if total_score >= 90:
+    evidence_sources = [
+        whois,
+        ssl,
+        headers,
+        spf,
+        dmarc,
+        virustotal,
+        abuseipdb,
+        google_safe_browsing,
+    ]
+    completed_sources = sum(source.get("status") == "success" for source in evidence_sources)
+
+    if completed_sources >= 7:
         confidence = "HIGH"
 
-    elif total_score >= 70:
+    elif completed_sources >= 5:
         confidence = "MEDIUM"
 
     else:
@@ -151,6 +165,9 @@ def calculate_risk(
         "trust_level": trust_level,
 
         "confidence": confidence,
+
+        "completed_sources": completed_sources,
+        "total_sources": len(evidence_sources),
 
         "category_scores": {
 

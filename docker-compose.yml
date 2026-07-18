@@ -1,0 +1,13 @@
+services:
+  api:
+    build: ./backend
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - domain-verdict-data:/app/data
+    environment:
+      DATABASE_URL: sqlite:////app/data/domain_verdict.db
+
+volumes:
+  domain-verdict-data:
