@@ -1,75 +1,42 @@
 from app.core.scoring import CATEGORY_WEIGHTS
 
 
+# A domain verdict should be driven primarily by domain-specific evidence.  IP
+# reputation is deliberately a small signal because many legitimate sites share
+# CDN and cloud-provider addresses with unrelated tenants.
+SOURCE_WEIGHTS = {
+    "virustotal": 18,
+    "google_safe_browsing": 10,
+    "abuseipdb": 2,
+}
+
+
+def _source_points(result, weight, unavailable_issue):
+    """Return weighted points without treating an unavailable service as safe."""
+    if result.get("status") == "success":
+        provider_score = min(max(result.get("score", 0), 0), 10)
+        return round(weight * provider_score / 10), result.get("issues", [])
+
+    # Unknown evidence is neutral, not a clean result and not a threat finding.
+    return round(weight / 2), [unavailable_issue]
+
+
 def calculate_threat_intelligence_score(
     virustotal,
     abuseipdb,
     google_safe_browsing
 ):
 
-    # Maximum score for Threat Intelligence
-    score = CATEGORY_WEIGHTS["threat_intelligence"]
-
+    score = 0
     issues = []
 
-    # ------------------------------------
-    # VirusTotal (10 Points)
-    # ------------------------------------
+    for result, source, message in (
+        (virustotal, "virustotal", "VirusTotal was unavailable; this scan has reduced threat-intelligence coverage."),
+        (google_safe_browsing, "google_safe_browsing", "Google Safe Browsing was unavailable; this scan has reduced threat-intelligence coverage."),
+        (abuseipdb, "abuseipdb", "AbuseIPDB was unavailable; this scan has reduced threat-intelligence coverage."),
+    ):
+        points, source_issues = _source_points(result, SOURCE_WEIGHTS[source], message)
+        score += points
+        issues.extend(source_issues)
 
-    vt_score = virustotal.get("score", 0)
-
-    if virustotal.get("status") == "success" and vt_score < 10:
-
-        deduction = 10 - vt_score
-
-        score -= deduction
-
-        issues.extend(
-            virustotal.get("issues", [])
-        )
-    elif virustotal.get("status") != "success":
-        issues.append("VirusTotal was unavailable; this scan has reduced threat-intelligence coverage.")
-
-    # ------------------------------------
-    # AbuseIPDB (10 Points)
-    # ------------------------------------
-
-    abuse_score = abuseipdb.get("score", 0)
-
-    if abuseipdb.get("status") == "success" and abuse_score < 10:
-
-        deduction = 10 - abuse_score
-
-        score -= deduction
-
-        issues.extend(
-            abuseipdb.get("issues", [])
-        )
-    elif abuseipdb.get("status") != "success":
-        issues.append("AbuseIPDB was unavailable; this scan has reduced threat-intelligence coverage.")
-
-    # ------------------------------------
-    # Google Safe Browsing (10 Points)
-    # ------------------------------------
-
-    gsb_score = google_safe_browsing.get("score", 0)
-
-    if google_safe_browsing.get("status") == "success" and gsb_score < 10:
-
-        deduction = 10 - gsb_score
-
-        score -= deduction
-
-        issues.extend(
-            google_safe_browsing.get("issues", [])
-        )
-    elif google_safe_browsing.get("status") != "success":
-        issues.append("Google Safe Browsing was unavailable; this scan has reduced threat-intelligence coverage.")
-
-    # ------------------------------------
-    # Prevent Negative Scores
-    # ------------------------------------
-
-    score = max(score, 0)
-
-    return score, issues
+    return min(score, CATEGORY_WEIGHTS["threat_intelligence"]), issues

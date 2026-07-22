@@ -22,8 +22,10 @@ def calculate_infrastructure_score(whois, dns, ssl):
 
     # WHOIS
     if whois.get("status") != "success":
-        score -= 5
-        issues.append("WHOIS lookup failed.")
+        # WHOIS data is increasingly redacted or rate-limited for legitimate
+        # registrants, so absence is only a modest coverage deduction.
+        score -= 2
+        issues.append("WHOIS could not be verified; ownership coverage is reduced.")
     else:
         if not whois["data"].get("registrar"):
             score -= 3

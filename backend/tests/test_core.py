@@ -35,6 +35,44 @@ def test_clean_scan_has_a_100_point_score_and_high_coverage():
     assert risk["completed_sources"] == 8
 
 
+def test_unavailable_reputation_sources_are_neutral_not_clean():
+    failed = {"status": "failed", "data": {}, "issues": []}
+    risk = calculate_risk(
+        {"status": "success", "data": {"registrar": "x", "creation_date": "2020-01-01"}},
+        {"A": ["1.1.1.1"]},
+        {"status": "success", "data": {"expired": False, "https": True}},
+        {"status": "success", "data": {}},
+        {"status": "success", "data": {"enabled": True}},
+        failed,
+        {"status": "success", "score": 10, "data": {}},
+        failed,
+        failed,
+        failed,
+    )
+    assert risk["category_scores"]["threat_intelligence"] == 15
+    assert risk["score"] == 85
+    assert risk["confidence"] == "MEDIUM"
+
+
+def test_confirmed_threats_have_a_large_score_impact():
+    success = {"status": "success", "data": {}, "score": 10, "issues": []}
+    risk = calculate_risk(
+        {"status": "success", "data": {"registrar": "x", "creation_date": "2020-01-01"}},
+        {"A": ["1.1.1.1"]},
+        {"status": "success", "data": {"expired": False, "https": True}},
+        success,
+        {"status": "success", "data": {"enabled": True}},
+        success,
+        {"status": "success", "score": 10, "data": {}},
+        {"status": "success", "score": 0, "data": {}, "issues": ["Malware detections"]},
+        success,
+        {"status": "success", "score": 0, "data": {}, "issues": ["Safe Browsing flag"]},
+    )
+    assert risk["category_scores"]["threat_intelligence"] == 2
+    assert risk["score"] == 72
+    assert risk["verdict"] == "MEDIUM RISK"
+
+
 def test_passwords_and_tokens_are_not_plaintext():
     password_hash = hash_password("a-long-test-password")
     assert password_hash != "a-long-test-password"

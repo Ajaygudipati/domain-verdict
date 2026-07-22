@@ -7,7 +7,7 @@ def calculate_domain_trust_score(whois):
     issues = []
 
     if whois.get("status") != "success":
-        return 5, ["WHOIS lookup failed; domain age could not be verified."]
+        return 6, ["Domain age could not be verified; trust coverage is reduced."]
 
     data = whois.get("data", {})
 
