@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Activity, ArrowRight, BadgeCheck, Check, ChevronRight, CircleAlert, Globe2, Radar, ScanSearch, ShieldCheck, Sparkles, TimerReset } from "lucide-react";
 import SearchBar from "../SearchBar/SearchBar";
 
@@ -40,9 +41,9 @@ function LiveReport() {
   const report = demos[active];
   const style = toneStyles[report.tone];
 
-  return <div className="relative mx-auto w-full max-w-lg">
+  return <motion.div initial={{ opacity: 0, y: 26, scale: .96 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: .22, duration: .75, ease: [0.16, 1, .3, 1] }} className="relative mx-auto w-full max-w-lg">
     <div className="absolute -inset-5 -z-10 rounded-[2.5rem] bg-gradient-to-br from-cyan-400/20 via-indigo-500/20 to-fuchsia-500/20 blur-3xl" />
-    <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 shadow-2xl shadow-slate-950/40">
+    <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950 shadow-2xl shadow-slate-950/40"><motion.div animate={{ y: ["-100%", "420%"] }} transition={{ duration: 4.5, ease: "linear", repeat: Infinity, repeatDelay: 1.5 }} className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-cyan-300/0 via-cyan-300/10 to-cyan-300/0" />
       <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 sm:px-6">
         <div className="flex items-center gap-2 text-sm font-semibold text-white"><div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10"><Radar size={15} /></div> Live verdict preview</div>
         <span className="flex items-center gap-1.5 text-xs font-medium text-slate-400"><span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> LIVE</span>
@@ -54,12 +55,12 @@ function LiveReport() {
         <div className="mt-6 space-y-2.5 border-t border-white/10 pt-5">{report.findings.map((finding, index) => <div key={finding} className="flex items-center gap-2.5 text-xs text-slate-300"><span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${index === 0 && active === 2 ? "bg-rose-400/15 text-rose-300" : "bg-emerald-400/15 text-emerald-300"}`}>{index === 0 && active === 2 ? <CircleAlert size={12} /> : <Check size={12} />}</span>{finding}</div>)}</div>
       </div>
     </div>
-  </div>;
+  </motion.div>;
 }
 
 export default function Hero() {
   return <>
-    <section className="relative overflow-hidden bg-slate-950 px-5 pb-20 pt-14 text-white sm:px-8 sm:pb-28 sm:pt-20">
+    <section className="relative overflow-hidden bg-slate-950 px-5 pb-20 pt-32 text-white sm:px-8 sm:pb-28 sm:pt-40">
       <div className="absolute inset-0 -z-0"><div className="absolute left-[10%] top-[-12rem] h-[30rem] w-[30rem] rounded-full bg-cyan-400/15 blur-[110px]" /><div className="absolute bottom-[-14rem] right-[3%] h-[32rem] w-[32rem] rounded-full bg-indigo-500/20 blur-[120px]" /><div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.045)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent)]" /></div>
       <div className="relative mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[1.05fr_.95fr] lg:gap-20">
         <div className="max-w-2xl"><div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-xs font-bold tracking-[0.12em] text-cyan-200"><Sparkles size={14} /> DOMAIN SECURITY, MADE CLEAR</div><h1 className="mt-6 text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl">Know what a domain is <span className="bg-gradient-to-r from-cyan-300 to-indigo-300 bg-clip-text text-transparent">really telling you.</span></h1><p className="mt-6 max-w-xl text-base leading-7 text-slate-300 sm:text-lg">Sentrynx turns complex DNS, certificate, ownership and threat data into one clear verdict—so you can decide what to trust in seconds.</p><div className="mt-8"><SearchBar /></div><div className="mt-5 flex flex-wrap gap-x-5 gap-y-3 text-xs font-medium text-slate-400"><span className="flex items-center gap-2"><ShieldCheck size={16} className="text-emerald-400" /> No account needed to scan</span><span className="flex items-center gap-2"><TimerReset size={16} className="text-cyan-300" /> Results in under a minute</span></div></div>

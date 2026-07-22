@@ -1,0 +1,24 @@
+import { motion } from "framer-motion";
+import { Activity, BadgeCheck, Database, Globe2, LockKeyhole, Radar, ShieldCheck, Waypoints } from "lucide-react";
+import MainLayout from "../layout/MainLayout";
+
+const checks = [
+  [Globe2, "Resolve", "We map the domain's DNS and hosting footprint."],
+  [LockKeyhole, "Validate", "We inspect certificate, HTTPS and browser defenses."],
+  [Radar, "Correlate", "We compare reputation and threat-intelligence signals."],
+  [ShieldCheck, "Explain", "We turn evidence into a practical trust verdict."],
+];
+
+export default function About() {
+  return <MainLayout><>
+    <section className="relative overflow-hidden bg-slate-950 px-5 pb-24 pt-12 text-white sm:px-8 sm:pb-32">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(34,211,238,.16),transparent_28%),radial-gradient(circle_at_80%_75%,rgba(99,102,241,.22),transparent_30%)]" />
+      <div className="relative mx-auto max-w-7xl"><p className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-xs font-bold tracking-[.14em] text-cyan-200"><Waypoints size={14} /> HOW SENTRYNX WORKS</p><div className="mt-7 grid items-center gap-12 lg:grid-cols-[.95fr_1.05fr]"><div><h1 className="text-4xl font-bold tracking-tight sm:text-6xl">Security evidence, <span className="text-cyan-300">connected.</span></h1><p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">We don't just collect data. We connect the signals behind a domain and show you the evidence that matters for a real-world decision.</p></div><Telemetry /></div></div>
+    </section>
+    <section className="bg-slate-50 px-5 py-20 sm:px-8 sm:py-28"><div className="mx-auto max-w-7xl"><p className="text-sm font-bold uppercase tracking-[.16em] text-indigo-600">The scanning journey</p><h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Four layers of evidence. One understandable result.</h2><div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{checks.map(([Icon, title, text], index) => <motion.article key={title} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .25 }} transition={{ delay: index * .08 }} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-white"><Icon size={20} /></span><p className="mt-6 text-xs font-bold tracking-[.14em] text-indigo-600">0{index + 1}</p><h3 className="mt-2 text-lg font-bold text-slate-950">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{text}</p></motion.article>)}</div></div></section>
+    <section className="bg-white px-5 py-20 sm:px-8"><div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2"><Fact icon={Database} title="Evidence, not assumptions" text="A missing provider response is labelled as reduced coverage, not silently treated as a clean result." /><Fact icon={BadgeCheck} title="Risk balanced for reality" text="Domain-specific signals lead the verdict, while shared infrastructure reputation has proportionate weight." /></div></section>
+  </></MainLayout>;
+}
+
+function Telemetry() { return <div className="relative mx-auto h-72 w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/70 p-6 shadow-2xl"><div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300 to-transparent" /><div className="flex items-center justify-between"><p className="flex items-center gap-2 text-sm font-bold"><Activity size={16} className="text-cyan-300" /> Signal telemetry</p><span className="text-xs text-emerald-300">Processing</span></div><div className="relative mt-8 h-40"><div className="absolute left-4 right-4 top-1/2 h-px bg-gradient-to-r from-cyan-400/0 via-cyan-300/60 to-indigo-400/0" />{[12, 35, 58, 82].map((left, index) => <motion.div key={left} animate={{ y: [10, -18, 10], opacity: [.4, 1, .4] }} transition={{ duration: 2.4 + index * .25, repeat: Infinity, delay: index * .25 }} className="absolute top-1/2 -translate-y-1/2" style={{ left: `${left}%` }}><span className="block h-3 w-3 rounded-full bg-cyan-300 shadow-[0_0_18px_5px_rgba(103,232,249,.45)]" /><span className="mt-3 block whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-slate-400">{["DNS", "TLS", "MAIL", "THREAT"][index]}</span></motion.div>)}</div></div>; }
+function Fact({ icon: Icon, title, text }) { return <article className="flex gap-5 rounded-2xl border border-slate-200 p-7"><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"><Icon size={21} /></span><div><h3 className="font-bold text-slate-950">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{text}</p></div></article>; }

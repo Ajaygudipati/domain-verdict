@@ -1,15 +1,17 @@
 import Navbar from "../components/Navbar/Navbar";
+import Footer from "../components/Footer/Footer";
 
-export default function MainLayout({ children }) {
+export default function MainLayout({ children, hero = false }) {
   return (
     <>
-      <Navbar />
+      <Navbar hero={hero} />
 
-      <main className="pt-28">
+      <main className={hero ? "" : "pt-28"}>
 
         {children}
 
       </main>
+      <Footer />
     </>
   );
 }

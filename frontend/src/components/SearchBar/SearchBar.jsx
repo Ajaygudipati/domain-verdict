@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingOverlay from "../../loading/LoadingOverlay";
 import { useAuth } from "../../context/AuthContext";
+import { Search } from "lucide-react";
 
 export default function SearchBar() {
   const [domain, setDomain] = useState("");
@@ -67,7 +68,7 @@ export default function SearchBar() {
       items-center
       rounded-2xl
       border
-      border-neutral-300
+      border-white/80
       bg-white
       p-2
       shadow-sm
@@ -82,13 +83,16 @@ export default function SearchBar() {
         onChange={(e) => setDomain(e.target.value)}
         onKeyDown={handleKeyDown}
         type="text"
-        placeholder="Search a domain..."
+        placeholder="Enter a domain, e.g. example.com"
         className="
         flex-1
         bg-transparent
         px-6
         py-4
         text-lg
+        font-medium
+        text-slate-950
+        placeholder:text-slate-400
         outline-none
         "
       />
@@ -97,8 +101,11 @@ export default function SearchBar() {
         onClick={handleAnalyze}
         disabled={loading}
         className="
+        inline-flex
+        items-center
+        gap-2
         rounded-xl
-        bg-black
+        bg-slate-950
         px-8
         py-4
         text-white
@@ -109,7 +116,7 @@ export default function SearchBar() {
         disabled:opacity-70
         "
       >
-        {loading ? "Analyzing..." : "Analyze"}
+        {loading ? "Analyzing..." : <><Search size={18} /> Analyze</>}
         
       </button>
       <LoadingOverlay loading={loading} progress={progress} />

@@ -3,7 +3,7 @@ import Hero from "../components/Hero/Hero";
 
 export default function Home() {
   return (
-    <MainLayout>
+    <MainLayout hero>
       <Hero />
     </MainLayout>
   );
