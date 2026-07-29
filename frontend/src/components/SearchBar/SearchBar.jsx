@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingOverlay from "../../loading/LoadingOverlay";
 import { useAuth } from "../../context/AuthContext";
-import { Search } from "lucide-react";
+import { Bot, Search, Sparkles } from "lucide-react";
 
 export default function SearchBar() {
   const [domain, setDomain] = useState("");
@@ -96,6 +96,15 @@ export default function SearchBar() {
         outline-none
         "
       />
+
+      <button
+        type="button"
+        onClick={() => navigate("/ai")}
+        className="group hidden shrink-0 items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-4 text-sm font-bold text-violet-700 transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-100 lg:inline-flex"
+      >
+        <span className="relative flex h-5 w-5 items-center justify-center rounded-md bg-violet-600 text-white"><Bot size={13} /><Sparkles size={9} className="absolute -right-1 -top-1 text-amber-400" /></span>
+        Ask Domaini AI
+      </button>
 
       <button
         onClick={handleAnalyze}
