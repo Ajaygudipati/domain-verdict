@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot, MessageCircle, Send, ShieldCheck, Sparkles, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const openings = {
   safe: ["Looking strong! This domain has built a reassuring security story.", "Nice work — the scan signals are largely healthy and well defended.", "This is a calm result. The important trust indicators are doing their job."],
@@ -24,9 +24,9 @@ function Thinking() {
   </motion.div>;
 }
 
-function buildAnswer(question, data) {
+function buildAnswer(question, data = {}) {
   const text = question.toLowerCase();
-  const { summary, analysis, issues = [], scan_info: scanInfo } = data;
+  const { summary = {}, analysis = {}, issues = [], scan_info: scanInfo = {} } = data;
   const threat = analysis?.virustotal?.data || {};
   const ssl = analysis?.ssl?.data || {};
   const email = analysis?.dmarc?.data || {};
@@ -43,25 +43,37 @@ function buildAnswer(question, data) {
   return `I can help interpret this scan for ${scanInfo?.domain || "the domain"}. Try asking whether it is safe, why the score is ${summary?.overall_score ?? "shown"}, about SSL, email security, threats, ownership, or the reported findings.`;
 }
 
-export default function DomainAdvisor({ data }) {
-  const [open, setOpen] = useState(false);
-  const [thinking, setThinking] = useState(false);
+export default function DomainAdvisor({ data = {}, initiallyOpen = false }) {
+  const [open, setOpen] = useState(initiallyOpen);
+  const [thinking, setThinking] = useState(initiallyOpen);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const timerRef = useRef();
   const bottomRef = useRef();
-  const { summary, issues = [] } = data;
+  const { summary = {}, issues = [] } = data;
   const tone = getTone(summary?.overall_score, summary?.verdict);
-  const makeStarter = () => {
-    const intro = openings[tone][Date.now() % openings[tone].length];
+  const starter = useMemo(() => {
+    const intro = openings[tone][issues.length % openings[tone].length];
     const keyFinding = issues[0] || (tone === "safe" ? "No material scoring deductions were reported." : "Review the report findings below for the full context.");
     return { id: "welcome", from: "ai", text: `${intro}\n\n${tone === "safe" ? "✨" : tone === "caution" ? "🧐" : "🚨"} ${keyFinding}` };
-  };
+  }, [issues, tone]);
 
   useEffect(() => () => clearTimeout(timerRef.current), []);
+  useEffect(() => {
+    if (!initiallyOpen) return undefined;
+    timerRef.current = setTimeout(() => { setMessages([starter]); setThinking(false); }, 850);
+    return () => clearTimeout(timerRef.current);
+  }, [initiallyOpen, starter]);
   useEffect(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), [messages, thinking]);
 
-  const start = () => { setOpen(true); if (!messages.length) { const starter = makeStarter(); setThinking(true); timerRef.current = setTimeout(() => { setMessages([starter]); setThinking(false); }, 850); } };
+  const start = () => {
+    setOpen(true);
+    if (!messages.length && !thinking) {
+      const variedStarter = { ...starter, id: `welcome-${Date.now()}` };
+      setThinking(true);
+      timerRef.current = setTimeout(() => { setMessages([variedStarter]); setThinking(false); }, 850);
+    }
+  };
   const ask = (question) => {
     const clean = question.trim();
     if (!clean || thinking) return;
