@@ -41,7 +41,7 @@ export default function AiAssistant() {
   const [report, setReport] = useState(null);
   const [progress, setProgress] = useState(null);
   const [scanning, setScanning] = useState(false);
-  const [messages, setMessages] = useState([{ role: "assistant", text: "Hi, I’m Domaini AI. ✨\n\nSend me a domain and I’ll turn its security signals into a clear verdict. Then you can ask me anything about it." }]);
+  const [messages, setMessages] = useState([{ role: "assistant", text: "Hi, I’m Sentrynx AI. ✨\n\nSend me a domain and I’ll turn its security signals into a clear verdict. Then you can ask me anything about it." }]);
   const streamRef = useRef(null);
   const endRef = useRef(null);
 
