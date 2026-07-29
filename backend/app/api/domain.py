@@ -50,6 +50,9 @@ def stream_scan(domain: str = Query(..., min_length=1, max_length=2048), token: 
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
+    # Resolve authentication before the worker starts.  Otherwise the thread
+    # can read user_id before this function has assigned it.
+    user_id = get_user_id_from_token(token) if token else None
     events = Queue()
 
     def run_scan():
@@ -61,7 +64,6 @@ def stream_scan(domain: str = Query(..., min_length=1, max_length=2048), token: 
             # ensuring the stream closes gracefully.
             events.put(("error", {"message": "The scan could not be completed. Please try again."}))
 
-    user_id = get_user_id_from_token(token) if token else None
     Thread(target=run_scan, daemon=True).start()
 
     def event_stream():
