@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingOverlay from "../../loading/LoadingOverlay";
 import { useAuth } from "../../context/AuthContext";
-import { Bot, Search, Sparkles } from "lucide-react";
+import { Search } from "lucide-react";
 
 export default function SearchBar() {
   const [domain, setDomain] = useState("");
@@ -11,7 +11,7 @@ export default function SearchBar() {
   const [progress, setProgress] = useState(null);
   const { token } = useAuth();
 
-  function handleAnalyze(openAdvisor = false) {
+  function handleAnalyze() {
   if (!domain.trim()) return;
 
     setLoading(true);
@@ -29,7 +29,7 @@ export default function SearchBar() {
       finished = true;
       stream.close();
       setLoading(false);
-      navigate("/analysis", { state: { ...JSON.parse(event.data), openAdvisor } });
+      navigate("/analysis", { state: JSON.parse(event.data) });
     });
 
     function fail(message) {
@@ -62,7 +62,6 @@ export default function SearchBar() {
   return (
     <div
       className="
-      relative
       mx-auto
       flex
       max-w-3xl
@@ -99,16 +98,6 @@ export default function SearchBar() {
       />
 
       <button
-        onClick={() => handleAnalyze(true)}
-        disabled={loading}
-        title="Scan this domain and ask Domaini AI about the results"
-        className="group hidden items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-4 text-sm font-bold text-violet-700 transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-70 sm:inline-flex"
-      >
-        <span className="relative flex h-5 w-5 items-center justify-center rounded-md bg-violet-600 text-white"><Bot size={13} /><Sparkles size={9} className="absolute -right-1 -top-1 text-amber-400" /></span>
-        Ask Domaini AI
-      </button>
-
-      <button
         onClick={handleAnalyze}
         disabled={loading}
         className="
@@ -130,7 +119,6 @@ export default function SearchBar() {
         {loading ? "Analyzing..." : <><Search size={18} /> Analyze</>}
         
       </button>
-      <button onClick={() => handleAnalyze(true)} disabled={loading} className="absolute -bottom-12 left-1/2 inline-flex -translate-x-1/2 items-center gap-2 whitespace-nowrap text-sm font-bold text-violet-200 transition hover:text-white disabled:opacity-60 sm:hidden"><Bot size={16} /> Ask Domaini AI <Sparkles size={13} /></button>
       <LoadingOverlay loading={loading} progress={progress} />
     </div>
   );
