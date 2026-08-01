@@ -10,6 +10,9 @@ import History from "./pages/History";
 import Login from "./pages/Login";
 import About from "./pages/About";
 import AiAssistant from "./pages/AiAssistant";
+import Workspace from "./pages/Workspace";
+import Extension from "./pages/Extension";
+import SharedReport from "./pages/SharedReport";
 import { AuthProvider } from "./context/AuthContext";
 
 export default function App(){
@@ -40,6 +43,12 @@ element={<History/>}
 <Route path="/about" element={<About/>} />
 
 <Route path="/ai" element={<AiAssistant/>} />
+
+<Route path="/workspace" element={<Workspace/>} />
+
+<Route path="/extension" element={<Extension/>} />
+
+<Route path="/shared/:token" element={<SharedReport/>} />
 
 </Routes>
 

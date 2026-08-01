@@ -30,6 +30,13 @@ def answer_from_scan(question: str, report: dict) -> dict:
         response.raise_for_status()
         data = response.json()
         answer = data.get("output_text")
+        if not answer:
+            answer = "\n".join(
+                part.get("text", "")
+                for item in data.get("output", [])
+                for part in item.get("content", [])
+                if part.get("type") == "output_text"
+            ).strip()
         if answer:
             return {"enabled": True, "answer": answer}
     except requests.RequestException:

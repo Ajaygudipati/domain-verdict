@@ -11,6 +11,7 @@ from app.core.security import get_user_id_from_token
 from app.utils.domain import normalize_domain
 from app.services.ai_service import answer_from_scan
 from app.services.conversation_service import get_conversation, save_conversation
+from app.services.product_service import add_watchlist, get_shared_scan, list_watchlist, remove_watchlist, save_feedback, share_scan, update_watchlist_result
 
 router = APIRouter()
 
@@ -22,6 +23,16 @@ class AiQuestion(BaseModel):
 
 class ConversationPayload(BaseModel):
     messages: list[dict] = Field(max_length=200)
+
+
+class WatchlistPayload(BaseModel):
+    domain: str = Field(min_length=1, max_length=2048)
+
+
+class FeedbackPayload(BaseModel):
+    category: str = Field(min_length=2, max_length=40)
+    message: str = Field(min_length=2, max_length=2000)
+    scan_id: int | None = None
 
 
 @router.get("/scan")
@@ -38,6 +49,62 @@ def scan_domain(domain: str = Query(..., min_length=1, max_length=2048), token: 
 @router.post("/ai/answer")
 def ai_answer(payload: AiQuestion):
     return answer_from_scan(payload.question, payload.report)
+
+
+@router.post("/reports/{scan_id}/share")
+def share_report(scan_id: int, token: str):
+    share_token = share_scan(get_user_id_from_token(token), scan_id)
+    if not share_token:
+        raise HTTPException(status_code=404, detail="Scan not found.")
+    return {"token": share_token}
+
+
+@router.get("/shared/{share_token}")
+def shared_report(share_token: str):
+    result = get_shared_scan(share_token)
+    if not result:
+        raise HTTPException(status_code=404, detail="Shared report not found.")
+    return result
+
+
+@router.get("/watchlist")
+def get_watchlist(token: str):
+    return {"items": list_watchlist(get_user_id_from_token(token))}
+
+
+@router.post("/watchlist")
+def create_watchlist(payload: WatchlistPayload, token: str):
+    try:
+        domain = normalize_domain(payload.domain)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return add_watchlist(get_user_id_from_token(token), domain)
+
+
+@router.post("/watchlist/{item_id}/check")
+def check_watchlist(item_id: int, token: str):
+    user_id = get_user_id_from_token(token)
+    items = {item["id"]: item for item in list_watchlist(user_id)}
+    item = items.get(item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Watchlist item not found.")
+    result = analyze_domain(item["domain"], user_id=user_id)
+    checked = update_watchlist_result(user_id, item_id, result)
+    return checked
+
+
+@router.delete("/watchlist/{item_id}")
+def delete_watchlist(item_id: int, token: str):
+    if not remove_watchlist(get_user_id_from_token(token), item_id):
+        raise HTTPException(status_code=404, detail="Watchlist item not found.")
+    return {"deleted": True}
+
+
+@router.post("/feedback")
+def submit_feedback(payload: FeedbackPayload, token: str | None = None):
+    user_id = get_user_id_from_token(token) if token else None
+    save_feedback(user_id, payload.scan_id, payload.category, payload.message.strip())
+    return {"saved": True}
 
 
 @router.get("/ai/conversations/{scan_id}")
