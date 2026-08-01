@@ -1,4 +1,4 @@
-import { Bot, CheckCircle2, Globe2, LoaderCircle, Send, ShieldCheck } from "lucide-react";
+import { Bot, CheckCircle2, Globe2, LoaderCircle, Send, ShieldCheck, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import MainLayout from "../layout/MainLayout";
@@ -10,20 +10,52 @@ function domainFrom(value) {
   } catch { return ""; }
 }
 
+function valueOrUnknown(value, label = "Not available") {
+  if (Array.isArray(value)) return value.length ? value.join(", ") : label;
+  return value === 0 ? "0" : value || label;
+}
+
+function reportOverview(report) {
+  const summary = report.summary || {};
+  const analysis = report.analysis || {};
+  const whois = analysis.whois?.data || {};
+  const ip = analysis.ip_intelligence?.data || {};
+  return `Here is the scan summary for ${report.scan_info?.domain || "this domain"}:\n\n• Verdict: ${valueOrUnknown(summary.verdict)} (${valueOrUnknown(summary.overall_score)}/100)\n• Registrar: ${valueOrUnknown(whois.registrar)}\n• Created: ${valueOrUnknown(whois.creation_date)}\n• Expires: ${valueOrUnknown(whois.expiration_date)}\n• IP address: ${valueOrUnknown(ip.ip)}\n\nYou can ask about ownership, DNS, hosting, certificate, email protection, threats, score, or fixes.`;
+}
+
 function reply(question, report) {
   const text = question.toLowerCase();
   const summary = report.summary || {};
   const analysis = report.analysis || {};
   const issues = report.issues || [];
+  const whois = analysis.whois?.data || {};
+  const dns = analysis.dns || {};
   const threat = analysis.virustotal?.data || {};
   const ssl = analysis.ssl?.data || {};
+  const ip = analysis.ip_intelligence?.data || {};
+  const technology = analysis.technology?.data || {};
+  const headers = analysis.security_headers?.data || {};
+  const registrationQuestion = /\bwhois\b|who\s+(is|owns|owned|registered)|registr|owner|ownership|created|creation|registered|expiry|expire|expiration|age|when\s+(was|is)/.test(text);
+  const dnsQuestion = /\bdns\b|nameserver|name server|\bmx\b|\baaaa?\b|\btxt\b|\bcname\b|record/.test(text);
+  const hostingQuestion = /\bip\b|host(ing|ed)?|server|location|country|organisation|organization|city|cdn|technology|powered/.test(text);
+  const overviewQuestion = /^(help|summary|overview|details|information|tell me (everything|about))\b/.test(text);
+
+  if (overviewQuestion) return reportOverview(report);
+  if (registrationQuestion) {
+    const details = [`Registrar: ${valueOrUnknown(whois.registrar)}`, `Created: ${valueOrUnknown(whois.creation_date)}`, `Expires: ${valueOrUnknown(whois.expiration_date)}`, `Nameservers: ${valueOrUnknown(whois.name_servers)}`];
+    if (/who\s+(is|owns|owned)|registrant|owner/.test(text)) details.push("Registrant identity: WHOIS data returned by this scan does not include a verified registrant name. Many domains use privacy protection, so the registrar is not necessarily the owner.");
+    return `Registration details for ${report.scan_info?.domain || "this domain"}:\n\n${details.map((item) => `• ${item}`).join("\n")}`;
+  }
+  if (dnsQuestion) return `DNS records for ${report.scan_info?.domain || "this domain"}:\n\n• A: ${valueOrUnknown(dns.A)}\n• AAAA: ${valueOrUnknown(dns.AAAA)}\n• MX: ${valueOrUnknown(dns.MX)}\n• NS: ${valueOrUnknown(dns.NS)}\n• TXT: ${valueOrUnknown(dns.TXT)}\n• CNAME: ${valueOrUnknown(dns.CNAME)}`;
+  if (hostingQuestion) return `Infrastructure details for ${report.scan_info?.domain || "this domain"}:\n\n• IP address: ${valueOrUnknown(ip.ip)}\n• Organization: ${valueOrUnknown(ip.organization)}\n• Location: ${[ip.city, ip.region, ip.country].filter(Boolean).join(", ") || "Not available"}\n• Web server: ${valueOrUnknown(technology.web_server)}\n• CDN: ${valueOrUnknown(technology.cdn)}\n• Powered by: ${valueOrUnknown(technology.powered_by)}`;
   if (/safe|trust|visit|legit|scam|phish/.test(text)) return `This domain is rated ${summary.verdict || "Unknown"} with a ${summary.overall_score ?? "-"}/100 score. ${Number(summary.overall_score) >= 70 ? "The scan is broadly reassuring, but no automated check can guarantee safety." : "Use caution before sharing sensitive information."}`;
   if (/score|verdict|why|mean/.test(text)) return `The ${summary.overall_score ?? "-"}/100 score combines infrastructure, website security, email authentication, threat intelligence, and domain trust. The current verdict is ${summary.verdict || "Unknown"}.`;
   if (/virus|malware|threat|blacklist|reputation/.test(text)) return `Threat intelligence reported ${threat.malicious ?? "no available"} malicious detection${Number(threat.malicious) === 1 ? "" : "s"}${threat.reputation != null ? ` and a reputation value of ${threat.reputation}` : ""}.`;
   if (/ssl|https|certificate/.test(text)) return ssl.issued_to ? `The certificate is issued to ${ssl.issued_to} by ${ssl.issued_by || "the reported issuer"}, with ${ssl.days_left ?? "an unknown number of"} days remaining.` : "This scan did not return enough certificate details to assess SSL confidently.";
   if (/email|spf|dkim|dmarc|spoof/.test(text)) return `SPF is ${analysis.spf?.data?.enabled ? "configured" : "not confirmed"}, DKIM is ${analysis.dkim?.data?.enabled ? "configured" : "not detected"}, and DMARC policy is ${analysis.dmarc?.data?.policy || "not reported"}.`;
+  if (/header|content-security|hsts|x-frame/.test(text)) return Object.keys(headers).length ? `Security-header results:\n\n${Object.entries(headers).map(([name, result]) => `• ${name}: ${valueOrUnknown(result)}`).join("\n")}` : "No security-header evidence was returned by this scan.";
   if (/fix|issue|problem|recommend/.test(text)) return issues.length ? `The most important items to review are: ${issues.slice(0, 3).join(" • ")}` : "The completed checks did not report scoring deductions. Keep certificates, DNS, and security headers reviewed regularly.";
-  return "I can explain safety, score, threats, SSL, email security, and recommended fixes. What would you like to know?";
+  return `${reportOverview(report)}\n\nI answer from the scan evidence, so I will be clear when a detail was not returned.`;
 }
 
 function Message({ item }) {
@@ -98,13 +130,13 @@ export default function AiAssistant() {
     window.setTimeout(() => addAssistant(reply(text, report)), 350);
   }
 
-  const suggestions = report ? ["Is it safe to visit?", "Why this score?", "Any threats found?", "What should I fix?"] : ["google.com", "github.com", "example.com"];
+  const suggestions = report ? ["Who is the registrar?", "When was it created?", "Show DNS records", "Where is it hosted?", "Is it safe to visit?", "What should I fix?"] : ["google.com", "github.com", "example.com"];
   const status = scanning ? progress?.stage || "Thinking" : report ? `Analysing ${report.scan_info?.domain || "domain"}` : "Ready to analyse";
 
   return <MainLayout><main className="min-h-screen bg-slate-50 pb-16 text-slate-950">
     <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-10 sm:px-8">
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col"><div className="mb-8 text-center"><div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-950 text-white shadow-xl shadow-slate-300"><Bot size={30} /></div><p className="mt-5 text-xs font-bold uppercase tracking-[.16em] text-cyan-700">Sentrynx AI analyst</p><h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Ask anything about a domain.</h1><p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">A chat-style security analyst that explains your domain scan in plain language.</p></div>
-        <section className="flex min-h-[420px] flex-1 flex-col rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50"><div className="border-b border-slate-100 px-5 py-4"><span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[.14em] text-cyan-700"><span className={`h-2 w-2 rounded-full ${scanning ? "animate-pulse bg-amber-400" : "bg-emerald-500"}`} /> {status}</span></div><div className="flex-1 space-y-5 overflow-y-auto bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,.13),transparent_34%),#f8fafc] p-5 sm:p-7">{messages.map((item, index) => <Message key={`${item.role}-${index}`} item={item} />)}{scanning && <div className="flex items-center gap-3 text-sm text-cyan-800"><div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-100"><LoaderCircle size={18} className="animate-spin" /></div><span>{progress?.completed || 0} of {progress?.total || 13} security checks complete...</span></div>}<div ref={endRef} /></div><div className="border-t border-slate-100 p-4 sm:p-5"><div className="mb-3 flex gap-2 overflow-x-auto pb-1">{suggestions.map((suggestion) => <button key={suggestion} onClick={() => send(suggestion)} disabled={scanning} className="whitespace-nowrap rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1.5 text-xs font-bold text-cyan-800 hover:bg-cyan-100 disabled:opacity-50">{suggestion}</button>)}</div><form onSubmit={(event) => { event.preventDefault(); send(); }} className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 focus-within:border-cyan-300 focus-within:ring-4 focus-within:ring-cyan-100"><Globe2 size={18} className="ml-2 text-slate-400" /><input value={input} onChange={(event) => setInput(event.target.value)} disabled={scanning} className="min-w-0 flex-1 bg-transparent px-2 py-2.5 text-sm outline-none placeholder:text-slate-400" placeholder={report ? "Ask a question about this domain..." : "Send a domain, e.g. example.com"} /><button disabled={!input.trim() || scanning} className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-white hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-40" aria-label="Send"><Send size={17} /></button></form><p className="mt-2 flex items-center gap-1.5 text-[11px] text-slate-400"><ShieldCheck size={12} /> Explanations use the completed scan and are not a guarantee of safety.</p></div></section>
+      <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col"><div className="relative mb-8 overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-9 text-center text-white shadow-2xl shadow-slate-300 sm:px-10"><div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(34,211,238,.27),transparent_30%),radial-gradient(circle_at_90%_90%,rgba(99,102,241,.3),transparent_32%)]" /><div className="relative"><div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl border border-white/15 bg-white/10 text-cyan-200 shadow-xl"><Bot size={30} /></div><p className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-cyan-200"><Sparkles size={14} /> Sentrynx AI analyst</p><h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Ask anything about a domain.</h1><p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">Get plain-language answers from the scan: ownership, DNS, hosting, certificates, threats and more.</p></div></div>
+        <section className="flex min-h-[480px] flex-1 flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/60"><div className="flex items-center justify-between border-b border-slate-100 bg-white px-5 py-4"><span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[.14em] text-cyan-700"><span className={`h-2 w-2 rounded-full ${scanning ? "animate-pulse bg-amber-400" : "bg-emerald-500"}`} /> {status}</span><span className="hidden text-xs font-medium text-slate-400 sm:inline">Grounded in scan evidence</span></div><div className="flex-1 space-y-5 overflow-y-auto bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,.13),transparent_34%),#f8fafc] p-5 sm:p-7">{messages.map((item, index) => <Message key={`${item.role}-${index}`} item={item} />)}{scanning && <div className="flex items-center gap-3 text-sm text-cyan-800"><div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-100"><LoaderCircle size={18} className="animate-spin" /></div><span>{progress?.completed || 0} of {progress?.total || 13} security checks complete...</span></div>}<div ref={endRef} /></div><div className="border-t border-slate-100 bg-white p-4 sm:p-5"><p className="mb-3 text-xs font-bold uppercase tracking-[.12em] text-slate-400">Try asking</p><div className="mb-4 flex gap-2 overflow-x-auto pb-1">{suggestions.map((suggestion) => <button key={suggestion} onClick={() => send(suggestion)} disabled={scanning} className="whitespace-nowrap rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1.5 text-xs font-bold text-cyan-800 transition hover:-translate-y-0.5 hover:bg-cyan-100 disabled:opacity-50">{suggestion}</button>)}</div><form onSubmit={(event) => { event.preventDefault(); send(); }} className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 transition focus-within:border-cyan-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-cyan-100"><Globe2 size={18} className="ml-2 text-slate-400" /><input value={input} onChange={(event) => setInput(event.target.value)} disabled={scanning} className="min-w-0 flex-1 bg-transparent px-2 py-2.5 text-sm outline-none placeholder:text-slate-400" placeholder={report ? "Ask a question about this domain..." : "Send a domain, e.g. example.com"} /><button disabled={!input.trim() || scanning} className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-white transition hover:scale-105 hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-40" aria-label="Send"><Send size={17} /></button></form><p className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400"><ShieldCheck size={12} /> Answers are based on the completed scan and are not a guarantee of safety.</p></div></section>
         <div className="mt-5 flex justify-center gap-5 text-xs text-slate-400"><span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-emerald-500" /> 13 security checks</span><span>Clear answers, not jargon</span></div>
       </div>
     </div>
