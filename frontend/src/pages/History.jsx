@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Clock3, FileWarning, History as HistoryIcon, LoaderCircle, Trash2 } from "lucide-react";
+import { ArrowLeft, Clock3, FileWarning, History as HistoryIcon, LoaderCircle, MessageSquare, Trash2 } from "lucide-react";
 import MainLayout from "../layout/MainLayout";
 import StatusBadge from "../components/dashboard/StatusBadge";
 import { useAuth } from "../context/AuthContext";
@@ -48,6 +48,19 @@ export default function History() {
     }
   }
 
+  async function continueChat(id) {
+    setOpening(id);
+    try {
+      const response = await fetch(`${API_URL}/history/${id}?token=${encodeURIComponent(token)}`);
+      if (!response.ok) throw new Error();
+      navigate("/ai", { state: { report: await response.json() } });
+    } catch {
+      setError("That report is no longer available.");
+    } finally {
+      setOpening(null);
+    }
+  }
+
   return <MainLayout>
     <main className="min-h-screen bg-slate-50 pb-16">
       <div className="mx-auto max-w-5xl px-5 pt-8 sm:px-8">
@@ -57,7 +70,7 @@ export default function History() {
         {loading && <div className="mt-10 flex items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white p-12 text-slate-500"><LoaderCircle className="animate-spin" size={20} /> Loading saved scans</div>}
         {error && <div className="mt-8 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
         {!loading && !error && !scans.length && <div className="mt-10 flex flex-col items-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center"><FileWarning size={34} className="text-slate-400" /><h2 className="mt-4 text-xl font-bold text-slate-900">No saved scans yet</h2><p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">Completed domain scans will automatically appear here.</p></div>}
-        {!loading && scans.length > 0 && <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">{scans.map((scan) => <div key={scan.id} className="flex flex-col gap-4 border-b border-slate-100 p-5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0"><div className="flex flex-wrap items-center gap-3"><h2 className="truncate text-lg font-bold text-slate-950">{scan.domain}</h2><StatusBadge value={scan.verdict} /></div><p className="mt-2 inline-flex items-center gap-2 text-sm text-slate-500"><Clock3 size={15} /> {new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(scan.created_at))}</p></div><div className="flex items-center gap-3"><div className="text-right"><p className="text-2xl font-bold tracking-tight text-slate-950">{scan.overall_score}</p><p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Score</p></div><button onClick={() => openScan(scan.id)} disabled={opening === scan.id} className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">{opening === scan.id ? "Opening..." : "Open"}</button><button onClick={() => deleteScan(scan.id)} className="rounded-xl p-2.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600" aria-label={`Delete ${scan.domain} scan`}><Trash2 size={18} /></button></div></div>)}</div>}
+        {!loading && scans.length > 0 && <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">{scans.map((scan) => <div key={scan.id} className="flex flex-col gap-4 border-b border-slate-100 p-5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0"><div className="flex flex-wrap items-center gap-3"><h2 className="truncate text-lg font-bold text-slate-950">{scan.domain}</h2><StatusBadge value={scan.verdict} /></div><p className="mt-2 inline-flex items-center gap-2 text-sm text-slate-500"><Clock3 size={15} /> {new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(scan.created_at))}</p></div><div className="flex items-center gap-3"><div className="text-right"><p className="text-2xl font-bold tracking-tight text-slate-950">{scan.overall_score}</p><p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Score</p></div><button onClick={() => continueChat(scan.id)} disabled={opening === scan.id} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-cyan-300 hover:bg-cyan-50"><MessageSquare size={16} /> Chat</button><button onClick={() => openScan(scan.id)} disabled={opening === scan.id} className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">{opening === scan.id ? "Opening..." : "Open"}</button><button onClick={() => deleteScan(scan.id)} className="rounded-xl p-2.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600" aria-label={`Delete ${scan.domain} scan`}><Trash2 size={18} /></button></div></div>)}</div>}
       </div>
     </main>
   </MainLayout>;

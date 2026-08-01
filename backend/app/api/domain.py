@@ -3,13 +3,25 @@ from queue import Empty, Queue
 from threading import Thread
 
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, Field
 from fastapi.responses import StreamingResponse
 from app.services.scan_service import analyze_domain
 from app.services.history_service import delete_scan, get_scan, list_scans
 from app.core.security import get_user_id_from_token
 from app.utils.domain import normalize_domain
+from app.services.ai_service import answer_from_scan
+from app.services.conversation_service import get_conversation, save_conversation
 
 router = APIRouter()
+
+
+class AiQuestion(BaseModel):
+    question: str = Field(min_length=1, max_length=2000)
+    report: dict
+
+
+class ConversationPayload(BaseModel):
+    messages: list[dict] = Field(max_length=200)
 
 
 @router.get("/scan")
@@ -21,6 +33,24 @@ def scan_domain(domain: str = Query(..., min_length=1, max_length=2048), token: 
 
     user_id = get_user_id_from_token(token) if token else None
     return analyze_domain(normalized_domain, user_id=user_id)
+
+
+@router.post("/ai/answer")
+def ai_answer(payload: AiQuestion):
+    return answer_from_scan(payload.question, payload.report)
+
+
+@router.get("/ai/conversations/{scan_id}")
+def load_ai_conversation(scan_id: int, token: str):
+    return get_conversation(get_user_id_from_token(token), scan_id) or {"messages": []}
+
+
+@router.put("/ai/conversations/{scan_id}")
+def update_ai_conversation(scan_id: int, payload: ConversationPayload, token: str):
+    saved = save_conversation(get_user_id_from_token(token), scan_id, payload.messages)
+    if not saved:
+        raise HTTPException(status_code=404, detail="Scan not found.")
+    return saved
 
 
 @router.get("/history")
