@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Activity, ArrowRight, BadgeCheck, Check, ChevronRight, CircleAlert, Globe2, Radar, ScanSearch, ShieldCheck, Sparkles, TimerReset } from "lucide-react";
 import SearchBar from "../SearchBar/SearchBar";
@@ -41,6 +41,13 @@ function LiveReport() {
   const report = demos[active];
   const style = toneStyles[report.tone];
 
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActive((current) => (current + 1) % demos.length);
+    }, 3800);
+    return () => window.clearInterval(interval);
+  }, []);
+
   return <motion.div initial={{ opacity: 0, y: 26, scale: .96 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: .22, duration: .75, ease: [0.16, 1, .3, 1] }} className="relative mx-auto w-full max-w-lg">
     <div className="absolute -inset-5 -z-10 rounded-[2.5rem] bg-gradient-to-br from-cyan-400/20 via-indigo-500/20 to-fuchsia-500/20 blur-3xl" />
     <div className="terminal-preview relative overflow-hidden rounded-[1.25rem] border border-white/10 bg-slate-950 shadow-2xl shadow-slate-950/40"><motion.div animate={{ y: ["-100%", "420%"] }} transition={{ duration: 4.5, ease: "linear", repeat: Infinity, repeatDelay: 1.5 }} className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-cyan-300/0 via-cyan-300/10 to-cyan-300/0" />
@@ -49,7 +56,7 @@ function LiveReport() {
         <span className="flex items-center gap-1.5 text-xs font-medium text-slate-400"><span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> LIVE</span>
       </div>
       <div className="p-5 sm:p-6">
-        <div className="flex flex-wrap gap-2">{demos.map((demo, index) => <button key={demo.label} onClick={() => setActive(index)} className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${index === active ? "border-white bg-white text-slate-950" : "border-white/15 text-slate-400 hover:border-white/40 hover:text-white"}`}>{demo.label}</button>)}</div>
+        <div className="flex flex-wrap gap-2" aria-label="Live preview rotation">{demos.map((demo, index) => <span key={demo.label} className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${index === active ? "border-white bg-white text-slate-950" : "border-white/15 text-slate-400"}`}>{demo.label}</span>)}</div>
         <div className="mt-6 flex items-start justify-between gap-4"><div className="min-w-0"><p className="truncate text-sm font-medium text-slate-400">{report.domain}</p><p className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">Security posture</p></div><span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] ${style.badge}`}>{report.verdict}</span></div>
         <div className="mt-5 grid grid-cols-[auto_1fr] items-center gap-5"><div className="relative flex h-24 w-24 items-center justify-center"><svg className="absolute h-24 w-24 -rotate-90"><circle cx="48" cy="48" r="41" fill="none" stroke="currentColor" strokeWidth="6" className="text-white/10" /><circle cx="48" cy="48" r="41" fill="none" strokeWidth="6" strokeLinecap="round" strokeDasharray="258" strokeDashoffset={258 - (258 * report.score) / 100} className={`${style.ring} transition-all duration-500`} /></svg><span className={`text-3xl font-bold ${style.score}`}>{report.score}</span></div><div><p className="text-sm font-semibold text-white">Overall trust score</p><p className="mt-1 text-xs leading-5 text-slate-400">A balanced view across the signals that matter most.</p><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10"><div className={`h-full rounded-full transition-all duration-500 ${style.bar}`} style={{ width: `${report.score}%` }} /></div></div></div>
         <div className="mt-6 space-y-2.5 border-t border-white/10 pt-5">{report.findings.map((finding, index) => <div key={finding} className="flex items-center gap-2.5 text-xs text-slate-300"><span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${index === 0 && active === 2 ? "bg-rose-400/15 text-rose-300" : "bg-emerald-400/15 text-emerald-300"}`}>{index === 0 && active === 2 ? <CircleAlert size={12} /> : <Check size={12} />}</span>{finding}</div>)}</div>

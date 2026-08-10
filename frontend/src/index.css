@@ -69,4 +69,21 @@ body{
 .terminal-ai { border-color: color-mix(in srgb, var(--neon) 35%, transparent); background: var(--neon-soft); color: var(--neon); }
 .terminal-ai span { background: var(--neon); color: #071009; }
 
+/* Scan report: the same dark command-center language as the home page. */
+.terminal-report { background: radial-gradient(circle at 18% 4%, var(--neon-soft), transparent 24rem), #080a0b; }
+.terminal-report-hero { position: relative; border-color: color-mix(in srgb, var(--neon) 34%, transparent); background: linear-gradient(120deg, rgba(255,255,255,.035), rgba(255,255,255,.01)); box-shadow: 0 20px 50px rgba(0,0,0,.32), 0 0 32px var(--neon-soft); }
+.terminal-report-hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .34; background: linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px); background-size: 44px 44px; mask-image: linear-gradient(90deg, black, transparent 72%); }
+.terminal-report-hero > * { position: relative; z-index: 1; }
+.terminal-back { color: #9ba39f; }
+.terminal-back:hover { color: var(--neon); }
+.terminal-globe, .terminal-detail-icon, .terminal-category-icon { color: var(--neon); background: var(--neon-soft); border: 1px solid color-mix(in srgb, var(--neon) 30%, transparent); }
+.terminal-score-wrap { background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.07); box-shadow: inset 0 0 40px rgba(0,0,0,.24); }
+.terminal-score { filter: drop-shadow(0 0 15px var(--neon-glow)); }
+.terminal-category, .terminal-detail, .terminal-panel { background: rgba(255,255,255,.028); border-color: rgba(255,255,255,.11); box-shadow: 0 12px 32px rgba(0,0,0,.18); }
+.terminal-category:hover { border-color: color-mix(in srgb, var(--neon) 48%, transparent); box-shadow: 0 14px 38px rgba(0,0,0,.28), 0 0 20px var(--neon-soft); }
+.terminal-category .bg-emerald-50, .terminal-category .bg-amber-50, .terminal-category .bg-red-50 { background-color: rgba(255,255,255,.08) !important; }
+.terminal-category .text-emerald-700, .terminal-category .text-amber-700, .terminal-category .text-red-700 { color: var(--neon) !important; }
+.terminal-report .bg-emerald-500 { background-color: var(--neon) !important; }
+.terminal-report .text-emerald-700, .terminal-report .text-emerald-500 { color: var(--neon) !important; }
+
 @media (max-width: 640px) { .theme-switcher > svg { display:none; } .theme-switcher { padding: .45rem; } .theme-swatch { width: .62rem; height: .62rem; } }

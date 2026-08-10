@@ -10,19 +10,12 @@ export default function ScoreCircle({
 
     const progress = circumference - (score / 100) * circumference;
 
-    let color = "#22c55e";
-
-    if (verdict === "MEDIUM RISK")
-        color = "#eab308";
-
-    if (verdict === "HIGH RISK")
-        color = "#ef4444";
-
-    if (verdict === "CRITICAL") color = "#dc2626";
+    const label = String(verdict || "").toLowerCase();
+    const color = label.includes("critical") || label.includes("high") ? "#ff5b68" : label.includes("medium") ? "#ffbd45" : "var(--neon)";
 
     return (
 
-        <div className="relative flex justify-center">
+        <div className="terminal-score relative flex justify-center">
 
             <svg
                 width="240"
@@ -34,7 +27,7 @@ export default function ScoreCircle({
                     cx="120"
                     cy="120"
                     r={radius}
-                    stroke="#e5e7eb"
+                    stroke="rgba(255,255,255,.10)"
                     strokeWidth="10"
                     fill="transparent"
                 />
@@ -67,13 +60,13 @@ export default function ScoreCircle({
 
             <div className="absolute flex h-[240px] w-[240px] flex-col items-center justify-center">
 
-                <h1 className="text-6xl font-bold text-black">
+                <h1 className="font-mono text-6xl font-bold text-white">
 
                     {score}
 
                 </h1>
 
-                <p className="mt-2 text-neutral-500">
+                <p className="mt-2 font-mono text-xs font-bold tracking-[.16em] text-slate-400">
 
                     {verdict}
 
