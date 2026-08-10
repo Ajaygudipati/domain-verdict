@@ -86,4 +86,17 @@ body{
 .terminal-report .bg-emerald-500 { background-color: var(--neon) !important; }
 .terminal-report .text-emerald-700, .terminal-report .text-emerald-500 { color: var(--neon) !important; }
 
+/* Security command-center scan loader */
+.scan-overlay { background: rgba(4, 7, 8, .88); backdrop-filter: blur(18px); }
+.scan-overlay-grid { opacity: .42; background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 42px 42px; mask-image: radial-gradient(circle at center, black, transparent 75%); }
+.scan-console { border-color: color-mix(in srgb, var(--neon) 35%, transparent); background: linear-gradient(145deg, rgba(16,20,20,.98), rgba(5,7,8,.98)); box-shadow: 0 24px 80px rgba(0,0,0,.58), 0 0 45px var(--neon-soft); }
+.scan-mark, .scan-shield { color: var(--neon); border: 1px solid color-mix(in srgb, var(--neon) 42%, transparent); background: var(--neon-soft); box-shadow: 0 0 24px var(--neon-soft); }
+.scan-orbit { border-color: color-mix(in srgb, var(--neon) 50%, transparent); }
+.scan-orbit-inner { border-color: rgba(255,255,255,.12); border-top-color: var(--neon); border-bottom-color: var(--neon); }
+.scan-step { color: #6d7773; border-color: rgba(255,255,255,.07); background: rgba(255,255,255,.018); transition: border-color .3s, color .3s, background .3s; }
+.scan-step > span:first-child { color: #7b8681; background: rgba(255,255,255,.05); }
+.scan-step.is-done { color: #dce8e1; border-color: color-mix(in srgb, var(--neon) 22%, transparent); background: var(--neon-soft); }
+.scan-step.is-done > span:first-child, .scan-step.is-active > span:first-child { color: #061009; background: var(--neon); }
+.scan-step.is-active { color: #eef5f0; border-color: color-mix(in srgb, var(--neon) 46%, transparent); background: rgba(255,255,255,.04); box-shadow: 0 0 18px var(--neon-soft); }
+
 @media (max-width: 640px) { .theme-switcher > svg { display:none; } .theme-switcher { padding: .45rem; } .theme-swatch { width: .62rem; height: .62rem; } }
