@@ -21,7 +21,8 @@ def build_response(domain, risk, analysis):
                 "completed_sources": risk["completed_sources"],
                 "total_sources": risk["total_sources"]
             },
-            "category_scores": risk["category_scores"]
+            "category_scores": risk["category_scores"],
+            "score_explanation": risk["score_explanation"]
         },
 
         "analysis": analysis,

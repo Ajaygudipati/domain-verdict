@@ -89,23 +89,35 @@ def calculate_risk(
 
     total_score = min(max(total_score, 0), 100)
 
+    evidence_sources = [whois, ssl, headers, spf, dmarc, virustotal, abuseipdb, google_safe_browsing]
+    completed_sources = sum(source.get("status") == "success" for source in evidence_sources)
+    confirmed_threat = any(source.get("status") == "success" and source.get("score", 10) == 0 for source in (virustotal, google_safe_browsing))
+    score_ceiling, score_policy_note = 100, "All core evidence sources completed successfully."
+    if confirmed_threat:
+        score_ceiling, score_policy_note = 39, "A confirmed threat-provider flag caps the score until it is resolved."
+    elif completed_sources < 5:
+        score_ceiling, score_policy_note = 69, "Limited evidence coverage prevents a high-trust score."
+    elif completed_sources < 7:
+        score_ceiling, score_policy_note = 84, "Incomplete evidence coverage prevents a top-tier score."
+    total_score = min(total_score, score_ceiling)
+
     # ------------------------------------
     # Verdict
     # ------------------------------------
 
-    if total_score >= 95:
+    if total_score >= 92:
         verdict = "SAFE"
         trust_level = "VERY TRUSTED"
 
-    elif total_score >= 80:
+    elif total_score >= 76:
         verdict = "LOW RISK"
         trust_level = "TRUSTED"
 
-    elif total_score >= 60:
+    elif total_score >= 55:
         verdict = "MEDIUM RISK"
         trust_level = "CAUTION"
 
-    elif total_score >= 40:
+    elif total_score >= 35:
         verdict = "HIGH RISK"
         trust_level = "UNTRUSTED"
 
@@ -118,18 +130,6 @@ def calculate_risk(
     # A score can be high while a third-party provider is unavailable, so using
     # the score itself here would overstate how complete the assessment is.
     # ------------------------------------
-
-    evidence_sources = [
-        whois,
-        ssl,
-        headers,
-        spf,
-        dmarc,
-        virustotal,
-        abuseipdb,
-        google_safe_browsing,
-    ]
-    completed_sources = sum(source.get("status") == "success" for source in evidence_sources)
 
     if completed_sources >= 7:
         confidence = "HIGH"
@@ -181,6 +181,18 @@ def calculate_risk(
 
             "domain_trust": domain_trust_score
 
+        },
+
+        "score_explanation": {
+            "policy": score_policy_note,
+            "score_ceiling": score_ceiling,
+            "categories": [
+                {"key": "infrastructure", "label": "Infrastructure", "earned": infrastructure_score, "maximum": 25},
+                {"key": "website_security", "label": "Website security", "earned": website_security_score, "maximum": 20},
+                {"key": "email_security", "label": "Email security", "earned": email_security_score, "maximum": 15},
+                {"key": "threat_intelligence", "label": "Threat intelligence", "earned": threat_intelligence_score, "maximum": 30},
+                {"key": "domain_trust", "label": "Domain trust", "earned": domain_trust_score, "maximum": 10},
+            ],
         },
 
         "issues": issues

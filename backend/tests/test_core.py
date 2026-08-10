@@ -69,8 +69,17 @@ def test_confirmed_threats_have_a_large_score_impact():
         {"status": "success", "score": 0, "data": {}, "issues": ["Safe Browsing flag"]},
     )
     assert risk["category_scores"]["threat_intelligence"] == 2
-    assert risk["score"] == 72
-    assert risk["verdict"] == "MEDIUM RISK"
+    assert risk["score"] == 39
+    assert risk["verdict"] == "HIGH RISK"
+    assert risk["score_explanation"]["score_ceiling"] == 39
+
+
+def test_url_intelligence_flags_a_lookalike_login_link():
+    from app.services.url_intelligence_service import inspect_url
+
+    result = inspect_url("http://g00gle-login.example/verify?account=x")
+    assert result["brand_match"] == "google"
+    assert result["risk_score"] >= 55
 
 
 def test_passwords_and_tokens_are_not_plaintext():
