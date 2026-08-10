@@ -68,10 +68,10 @@ export default function SearchBar() {
       flex
       max-w-3xl
       items-center
-      rounded-2xl
+      terminal-search rounded-2xl
       border
-      border-white/80
-      bg-white
+      border-white/10
+      bg-slate-950
       p-2
       shadow-sm
       transition-all
@@ -93,8 +93,8 @@ export default function SearchBar() {
         py-4
         text-lg
         font-medium
-        text-slate-950
-        placeholder:text-slate-400
+        text-white
+        placeholder:text-slate-500
         outline-none
         "
       />
@@ -102,9 +102,9 @@ export default function SearchBar() {
       <button
         type="button"
         onClick={() => navigate("/ai")}
-        className="absolute left-0 top-[calc(100%+0.85rem)] inline-flex items-center gap-2 rounded-xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-3 text-sm font-bold text-cyan-100 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/60 hover:bg-cyan-300/20"
+        className="terminal-ai absolute left-0 top-[calc(100%+0.85rem)] inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
       >
-        <span className="relative flex h-6 w-6 items-center justify-center rounded-md bg-cyan-300 text-slate-950"><Bot size={14} /><Sparkles size={9} className="absolute -right-1 -top-1 text-white" /></span>
+        <span className="relative flex h-6 w-6 items-center justify-center rounded-md"><Bot size={14} /><Sparkles size={9} className="absolute -right-1 -top-1 text-white" /></span>
         Ask Sentrynx AI
       </button>
 
@@ -116,10 +116,10 @@ export default function SearchBar() {
         items-center
         gap-2
         rounded-xl
-        bg-slate-950
+        terminal-button
         px-8
         py-4
-        text-white
+        text-black
         transition-all
         duration-300
         hover:bg-neutral-800

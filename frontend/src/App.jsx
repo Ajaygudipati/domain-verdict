@@ -14,12 +14,13 @@ import Workspace from "./pages/Workspace";
 import Extension from "./pages/Extension";
 import SharedReport from "./pages/SharedReport";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
 export default function App(){
 
 return(
 
-<AuthProvider><BrowserRouter>
+<ThemeProvider><AuthProvider><BrowserRouter>
 
 <Routes>
 
@@ -52,7 +53,7 @@ element={<History/>}
 
 </Routes>
 
-</BrowserRouter></AuthProvider>
+</BrowserRouter></AuthProvider></ThemeProvider>
 
 )
 

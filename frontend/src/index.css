@@ -9,19 +9,64 @@ padding:0;
 }
 
 body{
-
-font-family:"Montserrat",sans-serif;
-
-background:#ffffff;
-
-color:#111111;
-
-overflow-x:hidden;
-
+  font-family: "Montserrat", sans-serif;
+  background: #080a0b;
+  color: #eff4ee;
+  overflow-x: hidden;
 }
 
 *{
-
-box-sizing:border-box;
-
+  box-sizing:border-box;
 }
+
+/* The colour variables are deliberately limited to an accent on black: this
+   keeps the forensic/terminal look while letting the user make it their own. */
+:root[data-theme="green"] { --neon: #00f451; --neon-soft: rgba(0, 244, 81, .12); --neon-glow: rgba(0, 244, 81, .27); }
+:root[data-theme="cyan"] { --neon: #28d7ff; --neon-soft: rgba(40, 215, 255, .12); --neon-glow: rgba(40, 215, 255, .27); }
+:root[data-theme="violet"] { --neon: #a98bff; --neon-soft: rgba(169, 139, 255, .13); --neon-glow: rgba(169, 139, 255, .27); }
+:root[data-theme="pink"] { --neon: #ff4da6; --neon-soft: rgba(255, 77, 166, .12); --neon-glow: rgba(255, 77, 166, .27); }
+:root[data-theme="orange"] { --neon: #ff923e; --neon-soft: rgba(255, 146, 62, .12); --neon-glow: rgba(255, 146, 62, .27); }
+
+/* Shared app shell */
+#root { min-height: 100%; background: #080a0b; }
+:root[data-theme] main { background: #080a0b; }
+:root[data-theme] .bg-white, :root[data-theme] .bg-slate-50 { background-color: #0c0f10 !important; }
+:root[data-theme] .bg-slate-950, :root[data-theme] .bg-slate-900 { background-color: #080a0b !important; }
+:root[data-theme] .bg-white\/\[\.04\], :root[data-theme] .bg-white\/\[\.05\] { background-color: rgba(255,255,255,.025) !important; }
+:root[data-theme] .border-slate-200, :root[data-theme] .border-slate-100, :root[data-theme] .border-slate-300, :root[data-theme] .border-white\/10 { border-color: rgba(255,255,255,.11) !important; }
+:root[data-theme] .text-slate-950, :root[data-theme] .text-slate-900, :root[data-theme] .text-neutral-700 { color: #f3f6f4 !important; }
+:root[data-theme] .text-slate-600, :root[data-theme] .text-slate-500 { color: #9aa4a0 !important; }
+:root[data-theme] .text-indigo-600, :root[data-theme] .text-cyan-200, :root[data-theme] .text-cyan-300 { color: var(--neon) !important; }
+:root[data-theme] .bg-cyan-300, :root[data-theme] .bg-cyan-400, :root[data-theme] .bg-emerald-400 { background-color: var(--neon) !important; }
+:root[data-theme] .border-cyan-300\/20, :root[data-theme] .border-cyan-300\/30 { border-color: color-mix(in srgb, var(--neon) 30%, transparent) !important; }
+:root[data-theme] .bg-cyan-300\/10, :root[data-theme] .bg-cyan-300\/15 { background-color: var(--neon-soft) !important; }
+
+.terminal-header > div { border-color: color-mix(in srgb, var(--neon) 28%, transparent); background: rgba(8, 10, 11, .82); box-shadow: 0 16px 55px rgba(0,0,0,.42), 0 0 30px var(--neon-soft); }
+.terminal-logo { background: var(--neon-soft); color: var(--neon); border: 1px solid color-mix(in srgb, var(--neon) 45%, transparent); box-shadow: 0 0 22px var(--neon-soft); }
+.terminal-brand { color: var(--neon); letter-spacing: .08em; text-shadow: 0 0 18px var(--neon-glow); }
+.terminal-nav-link { color: #9ba39f; transition: color .2s, text-shadow .2s; }
+.terminal-nav-link:hover { color: var(--neon); text-shadow: 0 0 12px var(--neon-glow); }
+.terminal-account { background: var(--neon); color: #071009; box-shadow: 0 0 22px var(--neon-glow); transition: transform .2s, box-shadow .2s; }
+.terminal-account:hover { transform: translateY(-1px); box-shadow: 0 0 32px var(--neon-glow); }
+
+.theme-switcher { display: flex; align-items: center; gap: .5rem; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.035); color: #87918b; border-radius: .75rem; padding: .45rem .55rem; }
+.theme-swatches { display: flex; gap: .32rem; }
+.theme-swatch { height: .72rem; width: .72rem; border-radius: 999px; background: var(--swatch); border: 1px solid transparent; box-shadow: 0 0 6px color-mix(in srgb, var(--swatch) 70%, transparent); cursor: pointer; transition: transform .18s, box-shadow .18s; }
+.theme-swatch:hover, .theme-swatch.is-active { transform: scale(1.32); box-shadow: 0 0 0 2px #080a0b, 0 0 0 3px var(--swatch), 0 0 12px var(--swatch); }
+
+/* Terminal home treatment */
+:root[data-theme] .hero-terminal, :root[data-theme] .hero-terminal + section { background: #080a0b !important; }
+.hero-terminal { min-height: 690px; }
+.hero-terminal::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, transparent 49.96%, rgba(255,255,255,.025) 50%, transparent 50.04%), linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px); background-size: 58px 58px; mask-image: linear-gradient(to bottom, black, transparent 78%); }
+.terminal-kicker { color: var(--neon); border-color: color-mix(in srgb, var(--neon) 30%, transparent); background: var(--neon-soft); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.terminal-title { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: -.065em; }
+.terminal-title-accent { color: var(--neon); text-shadow: 0 0 35px var(--neon-glow); }
+.terminal-preview { border-color: color-mix(in srgb, var(--neon) 42%, transparent) !important; box-shadow: 0 0 35px var(--neon-soft), 0 28px 65px rgba(0,0,0,.45) !important; }
+.terminal-search { border-color: color-mix(in srgb, var(--neon) 52%, transparent) !important; box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 18px 45px rgba(0,0,0,.3); }
+.terminal-search:focus-within { border-color: var(--neon) !important; box-shadow: 0 0 25px var(--neon-soft); }
+.terminal-button { background: var(--neon) !important; color: #061109 !important; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 800; box-shadow: 0 0 24px var(--neon-glow); }
+.terminal-button:hover { filter: brightness(1.12); }
+.terminal-ai { border-color: color-mix(in srgb, var(--neon) 35%, transparent); background: var(--neon-soft); color: var(--neon); }
+.terminal-ai span { background: var(--neon); color: #071009; }
+
+@media (max-width: 640px) { .theme-switcher > svg { display:none; } .theme-switcher { padding: .45rem; } .theme-swatch { width: .62rem; height: .62rem; } }

@@ -1,45 +1,12 @@
-import { Moon } from "lucide-react";
+import { Palette } from "lucide-react";
+import { useTheme } from "../../context/ThemeContext";
 
-export default function ThemeToggle(){
-
-    return(
-
-        <button
-
-        className="
-
-        h-12
-
-        w-12
-
-        rounded-full
-
-        border
-
-        border-white/10
-
-        bg-white/10
-
-        backdrop-blur-xl
-
-        flex
-
-        items-center
-
-        justify-center
-
-        hover:bg-white/20
-
-        transition-all
-
-        duration-500"
-
-        >
-
-            <Moon size={20}/>
-
-        </button>
-
-    )
-
+export default function ThemeToggle() {
+  const { theme, setTheme, palettes } = useTheme();
+  return <div className="theme-switcher" aria-label="Choose interface colour">
+    <Palette size={15} aria-hidden="true" />
+    <div className="theme-swatches">
+      {palettes.map((palette) => <button key={palette.id} type="button" title={palette.label} aria-label={`Use ${palette.label} theme`} aria-pressed={theme === palette.id} className={`theme-swatch ${theme === palette.id ? "is-active" : ""}`} style={{ "--swatch": palette.color }} onClick={() => setTheme(palette.id)} />)}
+    </div>
+  </div>;
 }
