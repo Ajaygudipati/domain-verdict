@@ -14,6 +14,8 @@ import Workspace from "./pages/Workspace";
 import Extension from "./pages/Extension";
 import SharedReport from "./pages/SharedReport";
 import EmailLab from "./pages/EmailLab";
+import ForgotPassword from "./pages/ForgotPassword";
+import Users from "./pages/Users";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
@@ -41,6 +43,12 @@ element={<History/>}
 />
 
 <Route path="/login" element={<Login/>} />
+
+<Route path="/forgot-password" element={<ForgotPassword/>} />
+
+<Route path="/reset-password" element={<ForgotPassword/>} />
+
+<Route path="/users" element={<Users/>} />
 
 <Route path="/about" element={<About/>} />
 
