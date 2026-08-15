@@ -13,6 +13,7 @@ from app.services.ai_service import answer_from_scan
 from app.services.conversation_service import get_conversation, save_conversation
 from app.services.product_service import add_watchlist, get_shared_scan, list_watchlist, remove_watchlist, save_feedback, share_scan, update_watchlist_result
 from app.services.url_intelligence_service import inspect_url
+from app.services.email_lab_service import investigate_email
 
 router = APIRouter()
 
@@ -40,6 +41,10 @@ class UrlInspectionPayload(BaseModel):
     url: str = Field(min_length=3, max_length=4096)
 
 
+class EmailInvestigationPayload(BaseModel):
+    raw_email: str = Field(min_length=10, max_length=100000)
+
+
 @router.get("/scan")
 def scan_domain(domain: str = Query(..., min_length=1, max_length=2048), token: str | None = None):
     try:
@@ -62,6 +67,11 @@ def inspect_link(payload: UrlInspectionPayload):
         return inspect_url(payload.url)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/email-lab/investigate")
+def investigate_email_message(payload: EmailInvestigationPayload):
+    return investigate_email(payload.raw_email)
 
 
 @router.post("/reports/{scan_id}/share")

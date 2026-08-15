@@ -13,6 +13,7 @@ import AiAssistant from "./pages/AiAssistant";
 import Workspace from "./pages/Workspace";
 import Extension from "./pages/Extension";
 import SharedReport from "./pages/SharedReport";
+import EmailLab from "./pages/EmailLab";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
@@ -46,6 +47,8 @@ element={<History/>}
 <Route path="/ai" element={<AiAssistant/>} />
 
 <Route path="/workspace" element={<Workspace/>} />
+
+<Route path="/email-lab" element={<EmailLab/>} />
 
 <Route path="/extension" element={<Extension/>} />
 
